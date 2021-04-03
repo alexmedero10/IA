@@ -68,7 +68,7 @@ class App():
 			linea = []
 			for j in range(len(Mapa.mapa[i])):
 				linea.append(Label(self.root,text="{},{}".format(i,j)))
-				linea[j].configure(background="gray12", borderwidth=2, relief="solid")
+				linea[j].configure(background="black", borderwidth=2, relief="solid")
 				linea[j].grid(row=i,column=j,sticky=S+N+E+W)
 			self.lista.append(linea)
 
@@ -115,7 +115,7 @@ class App():
 			self.pedirDatos()
 			return
 
-		self.lista[n][m].configure(background="gray12")
+		self.lista[n][m].configure(background="black")
 		
 	def pedirCeldaDescubir(self):
 		self.root.deiconify()
