@@ -5,7 +5,6 @@ from Celda import *
 from Mapa import *
 
 class App:
-	lista = []
 	mapa = Mapa()
 
 	def __init__(self):
