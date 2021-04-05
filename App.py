@@ -21,9 +21,13 @@ class App:
 		self.filemenu.add_separator()
 		self.filemenu.add_command(label="Bloquear mapa",command=self.mapa.bloquearMapa)
 		self.filemenu.add_separator()
-		self.filemenu.add_command(label="Bloquear celda",command=self.pedirCeldaBloquear)
+		self.filemenu.add_command(label="Bloquear celda",command=lambda:self.pedirCelda(1))
 		self.filemenu.add_separator()
-		self.filemenu.add_command(label="Descubir celda",command=self.pedirCeldaDescubir)
+		self.filemenu.add_command(label="Descubir celda",command=lambda:self.pedirCelda(2))
+		self.filemenu.add_separator()
+		self.filemenu.add_command(label="Mostrar valor",command=lambda:self.pedirCelda(3))
+		self.filemenu.add_separator()
+		self.filemenu.add_command(label="Cambiar valor",command=lambda:self.pedirCelda(4))
 
 		self.menubar.add_cascade(label="ACTIONS",menu=self.filemenu)
 		self.root.mainloop()
@@ -51,7 +55,6 @@ class App:
 			i.grid_remove()
 			print(i.grid_info())
 
-		self.lista.clear()
 		for i in range(len(self.mapa.laberinto)):
 			self.root.rowconfigure(i, weight=1)
 
@@ -88,7 +91,8 @@ class App:
 		
 		Button(ventanaDatos,text="Crear",command=lambda:self.abrirArchivo(str(d1.get()),ventanaDatos)).grid(row=0,column=2)
 
-	def pedirCeldaBloquear(self):
+
+	def pedirCelda(self, opcion):
 		self.root.deiconify()
 		ventanaDatos = Toplevel()
 		ventanaDatos.title("Laberinto")
@@ -102,24 +106,15 @@ class App:
 		d2 = StringVar()
 		Entry(ventanaDatos,justify="center",textvariable=d2).grid(row=0,column=1)
 		
-		Button(ventanaDatos,text="Crear",command=lambda:self.mapa.laberinto[int(d1.get())][int(d2.get())].bloquearCelda(ventanaDatos)).grid(row=0,column=2)
-
-		
-	def pedirCeldaDescubir(self):
-		self.root.deiconify()
-		ventanaDatos = Toplevel()
-		ventanaDatos.title("Laberinto")
-		ventanaDatos.resizable(1,1)
-		ventanaDatos.geometry('380x300')
-		ventanaDatos.configure(background="dark turquoise")
-
-		d1 = StringVar()
-		Entry(ventanaDatos,justify="center",textvariable=d1).grid(row=0,column=0)
-
-		d2 = StringVar()
-		Entry(ventanaDatos,justify="center",textvariable=d2).grid(row=0,column=1)
-		
-		Button(ventanaDatos,text="Crear",command=lambda:self.mapa.laberinto[int(d1.get())][int(d2.get())].descubrirCelda(ventanaDatos)).grid(row=0,column=2)
-
+		if opcion == 1:
+			Button(ventanaDatos,text="Crear",command=lambda:self.mapa.laberinto[int(d1.get())][int(d2.get())].bloquearCelda(ventanaDatos)).grid(row=0,column=2)
+		elif opcion == 2:
+			Button(ventanaDatos,text="Crear",command=lambda:self.mapa.laberinto[int(d1.get())][int(d2.get())].descubrirCelda(ventanaDatos)).grid(row=0,column=2)
+		elif opcion == 3:
+			Button(ventanaDatos,text="Crear",command=lambda:self.mapa.laberinto[int(d1.get())][int(d2.get())].mostrarValor(ventanaDatos)).grid(row=0,column=2)
+		elif opcion == 4:
+			d3 = StringVar()
+			Entry(ventanaDatos,justify="center",textvariable=d3).grid(row=1,column=0)
+			Button(ventanaDatos,text="Crear",command=lambda:self.mapa.laberinto[int(d1.get())][int(d2.get())].cambiarValor(int(d3.get()),ventanaDatos)).grid(row=0,column=2)
 
 app = App()

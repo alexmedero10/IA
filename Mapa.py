@@ -8,18 +8,5 @@ class Mapa:
 			for celda in self.laberinto[i]:
 				celda.setLabel("black")
 
-	def mostrarValor(self):
-		#MOSTRAR VALOR
-		fila = int(input("Fila: "))
-		columna = int(input("Columna: "))
-		print(self.laberinto[fila][columna])
-
-	def cambiarValor(self):
-		#CAMBIAR VALOR
-		fila = int(input("Fila: "))
-		columna = int(input("Columna: "))
-		terreno = int(input("Nuevo terreno: "))
-		self.laberinto[fila][columna] = terreno
-
 	def setLaberinto(self, laberinto):
 		self.laberinto = laberinto

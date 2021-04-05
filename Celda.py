@@ -1,4 +1,5 @@
 from tkinter import *
+from tkinter import messagebox
 class Celda:
 
 	def __init__(self,label,terreno,marcas):
@@ -6,8 +7,20 @@ class Celda:
 		self.terreno = terreno
 		self.marcas = marcas
 
+	def mostrarValor(self,ventanaDatos):
+		ventanaDatos.destroy()
+		messagebox.showinfo("Valor",str(self.terreno))
+
+	def cambiarValor(self,valor,ventanaDatos):
+		ventanaDatos.destroy()
+		self.terreno = valor
+		self.setColor()
+
 	def descubrirCelda(self,ventanaDatos):
 		ventanaDatos.destroy()
+		self.setColor()
+
+	def setColor(self):
 		if self.terreno == 0:
 			self.label.configure(background="blue", borderwidth=2, relief="solid")
 		elif self.terreno == 1:
