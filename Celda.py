@@ -15,8 +15,34 @@ class Celda:
 		ventanaDatos.destroy()
 		self.terreno = valor
 		self.setColor()
-		self.marcas[X] = X
-		self.label.configure(text="{}".format(self.marcas[X]))
+
+	def setMarcas(self, lista):
+		if lista["V"] != 0:
+			self.marcas["V"] = "V"
+
+		if lista["O"] != 0:
+			self.marcas["O"] = "O"
+		else:
+			self.marcas["O"] = 0
+
+		if lista["X"] != 0:
+			self.marcas["X"] = "X"
+		else:
+			self.marcas["X"] = 0
+		x = ""
+		self.label.configure(text=str([x+key for key,i in lista.items() if i!=0]))
+
+	def establecerInicio(self,ventanaDatos):
+		ventanaDatos.destroy()
+		self.marcas["I"] = "I"
+		self.marcas["X"] = "X"
+		self.label.configure(text="['{}','{}']".format(self.marcas["I"],self.marcas["X"]))
+		self.setColor()
+
+	def establecerFin(self,ventanaDatos):
+		ventanaDatos.destroy()
+		self.marcas["F"] = "F"
+		self.label.configure(text="['{}']".format(self.marcas["F"]))
 
 	def descubrirCelda(self,ventanaDatos):
 		ventanaDatos.destroy()
