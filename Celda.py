@@ -72,5 +72,9 @@ class Celda:
 		ventanaDatos.destroy()
 		self.label.configure(background="black")
 
+	def checarFinal(self):
+		if self.label.text["F"] != 0:
+			return 1
+
 	def setLabel(self,color):
 		self.label.configure(background=color)

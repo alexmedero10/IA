@@ -44,6 +44,11 @@ class App:
 
 		self.menubar.add_cascade(label="INICIAR",menu=self.filemenu2)
 
+		self.root.bind("<Right>",self.right)
+		self.root.bind("<Left>",self.left)
+		self.root.bind("<Up>",self.up)
+		self.root.bind("<Down>",self.down)
+
 		self.root.mainloop()
 
 	def abrirArchivo(self, file):
@@ -171,13 +176,13 @@ class App:
 		opcion3 = IntVar()
 		def seleccionar():
 			if opcion2.get() == 1:
-				self.agente.setVueltas({"L":1,"R":0,"U":0,"D":0})
+				self.agente.setVueltas({"L":1,"R":0})
 				self.agente.setMovimientos({"F":1,"B":0,"L":0,"R":0})
 			elif opcion2.get() == 2:
-				self.agente.setVueltas({"L":1,"R":1,"U":0,"D":0})
+				self.agente.setVueltas({"L":1,"R":1})
 				self.agente.setMovimientos({"F":1,"B":0,"L":0,"R":0})
 			elif opcion2.get() == 3:
-				self.agente.setVueltas({"L":0,"R":0,"U":0,"D":0})
+				self.agente.setVueltas({"L":0,"R":0})
 				self.agente.setMovimientos({"F":1,"B":1,"L":1,"R":1})
 			self.crearAgente(self.agente,opcion3)
 			ventanaDatos.destroy() 
@@ -193,11 +198,24 @@ class App:
 		self.agente.setPosicion(self.puntoX,self.puntoY)
 		self.agente.usarSensores(self.mapa)
 
+	def right(self,event):
+		self.agente.mover(self.mapa,"R")
+		self.mapa[agente.posicionX][agente.posicionY].checarFinal()
+		self.agente.usarSensores(self.mapa)
 
-	"""
-	root.bind("<Right>",right)
-	root.bind("<Left>",left)
-	root.bind("<Up>",up)
-	root.bind("<Down>",down)
-	"""
+	def left(self,event):
+		self.agente.mover(self.mapa,"L")
+		self.mapa[agente.posicionX][agente.posicionY].checarFinal()
+		self.agente.usarSensores(self.mapa)
+
+	def up(self,event):
+		self.agente.mover(self.mapa,"F")
+		self.mapa[agente.posicionX][agente.posicionY].checarFinal()
+		self.agente.usarSensores(self.mapa)
+
+	def down(self,event):
+		self.agente.mover(self.mapa,"B")
+		self.mapa[agente.posicionX][agente.posicionY].checarFinal()
+		self.agente.usarSensores(self.mapa)
+
 app = App()
