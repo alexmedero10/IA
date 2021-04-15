@@ -39,8 +39,8 @@ class App:
 
 		self.filemenu2 = Menu(self.menubar,tearoff=0)
 		self.filemenu2.add_command(label="Escoger agente",command=self.escogerAgente)
-		self.filemenu2.add_separator()
-		self.filemenu2.add_command(label="Establece inicio",command=lambda:self.pedirCelda(5))
+		#self.filemenu2.add_separator()
+		#self.filemenu2.add_command(label="Establece inicio",command=lambda:self.ponerInicio)
 
 		self.menubar.add_cascade(label="INICIAR",menu=self.filemenu2)
 
@@ -76,10 +76,11 @@ class App:
 
 		for i in range(len(self.mapa.laberinto)):
 			for j in range(len(self.mapa.laberinto[i])):
-				linea = Celda(Label(self.root,text="{},{}".format(i,j)),self.mapa.laberinto[i][j],{"V":0,"O":0,"I":0,"X":0,"F":0})
+				linea = Celda(Label(self.root,text=""),self.mapa.laberinto[i][j],{"V":0,"O":0,"I":0,"X":0,"F":0})
 				linea.setColor()
 				linea.label.grid(row=i,column=j,sticky=S+N+E+W)
 				self.mapa.laberinto[i][j] = linea
+		self.mapa.bloquearMapa()
 
 
 	def pedirArchivo(self):
@@ -126,6 +127,9 @@ class App:
 
 
 	def escogerAgente(self):
+		if self.mapa.laberinto == []:
+			self.pedirArchivo()
+
 		self.root.deiconify()
 		ventanaDatos = Toplevel()
 		ventanaDatos.title("Escoge agente")
@@ -133,23 +137,6 @@ class App:
 		ventanaDatos.geometry('380x300')
 		ventanaDatos.configure(background="dark turquoise")
 		opcion = IntVar()
-		def seleccionar():
-			self.escogerTipo(opcion)
-			ventanaDatos.destroy() 
-
-		Radiobutton(ventanaDatos,text="Humano",variable=opcion,value=1,command=seleccionar).grid(row=0,column=0)
-		Radiobutton(ventanaDatos,text="Mono",variable=opcion,value=2,command=seleccionar).grid(row=1,column=0)
-		Radiobutton(ventanaDatos,text="Pulpo",variable=opcion,value=3,command=seleccionar).grid(row=2,column=0)
-		Radiobutton(ventanaDatos,text="Pie grande",variable=opcion,value=4,command=seleccionar).grid(row=3,column=0)
-
-	def escogerTipo(self, opcion):
-		self.root.deiconify()
-		ventanaDatos = Toplevel()
-		ventanaDatos.title("Escoge tipo")
-		ventanaDatos.resizable(1,1)
-		ventanaDatos.geometry('380x300')
-		ventanaDatos.configure(background="dark turquoise")
-		opcion2 = IntVar()
 		def seleccionar():
 			if opcion.get() == 1:
 				self.agente = Humano()
@@ -159,21 +146,22 @@ class App:
 				self.agente = Pulpo()
 			elif opcion.get() == 4:
 				self.agente = PieGrande()
-			self.escogerSensores(self.agente,opcion2)
+			self.escogerTipo()
 			ventanaDatos.destroy() 
 
-		Radiobutton(ventanaDatos,text="Agente 1",variable=opcion2,value=1,command=seleccionar).grid(row=0,column=0)
-		Radiobutton(ventanaDatos,text="Agente 2",variable=opcion2,value=2,command=seleccionar).grid(row=1,column=0)
-		Radiobutton(ventanaDatos,text="Agente 3",variable=opcion2,value=3,command=seleccionar).grid(row=2,column=0)
+		Radiobutton(ventanaDatos,text="Humano",variable=opcion,value=1,command=seleccionar).grid(row=0,column=0)
+		Radiobutton(ventanaDatos,text="Mono",variable=opcion,value=2,command=seleccionar).grid(row=1,column=0)
+		Radiobutton(ventanaDatos,text="Pulpo",variable=opcion,value=3,command=seleccionar).grid(row=2,column=0)
+		Radiobutton(ventanaDatos,text="Pie grande",variable=opcion,value=4,command=seleccionar).grid(row=3,column=0)
 
-	def escogerSensores(self,agente,opcion2):
+	def escogerTipo(self):
 		self.root.deiconify()
 		ventanaDatos = Toplevel()
-		ventanaDatos.title("Escoge sensores")
+		ventanaDatos.title("Escoge tipo")
 		ventanaDatos.resizable(1,1)
 		ventanaDatos.geometry('380x300')
 		ventanaDatos.configure(background="dark turquoise")
-		opcion3 = IntVar()
+		opcion2 = IntVar()
 		def seleccionar():
 			if opcion2.get() == 1:
 				self.agente.setVueltas({"L":1,"R":0})
@@ -184,38 +172,126 @@ class App:
 			elif opcion2.get() == 3:
 				self.agente.setVueltas({"L":0,"R":0})
 				self.agente.setMovimientos({"F":1,"B":1,"L":1,"R":1})
-			self.crearAgente(self.agente,opcion3)
+			self.escogerSensores()
 			ventanaDatos.destroy() 
 
-		Radiobutton(ventanaDatos,text="Ser 1",variable=opcion3,value=1,command=seleccionar).grid(row=0,column=0)
-		Radiobutton(ventanaDatos,text="Ser 2",variable=opcion3,value=2,command=seleccionar).grid(row=1,column=0)
+		Radiobutton(ventanaDatos,text="Agente 1",variable=opcion2,value=1,command=seleccionar).grid(row=0,column=0)
+		Radiobutton(ventanaDatos,text="Agente 2",variable=opcion2,value=2,command=seleccionar).grid(row=1,column=0)
+		Radiobutton(ventanaDatos,text="Agente 3",variable=opcion2,value=3,command=seleccionar).grid(row=2,column=0)
 
-	def crearAgente(self,agente,opcion3):
-		if opcion3.get() == 1:
-			self.agente.setSensores({"L":0,"R":1,"U":0,"D":0})
-		elif opcion3.get() == 2:
-			self.agente.setSensores({"L":1,"R":1,"U":1,"D":1})
-		self.agente.setPosicion(self.puntoX,self.puntoY)
-		self.agente.usarSensores(self.mapa)
+	def escogerSensores(self):
+		self.root.deiconify()
+		ventanaDatos = Toplevel()
+		ventanaDatos.title("Escoge sensores")
+		ventanaDatos.resizable(1,1)
+		ventanaDatos.geometry('380x300')
+		ventanaDatos.configure(background="dark turquoise")
+		opcion3 = IntVar()
+		def seleccionar():
+			if opcion3.get() == 1:
+				self.root.deiconify()
+				ventanaDatos2 = Toplevel()
+				ventanaDatos2.title("Escoge sensores")
+				ventanaDatos2.resizable(1,1)
+				ventanaDatos2.geometry('380x300')
+				ventanaDatos2.configure(background="dark turquoise")
+				opcion4 = IntVar()
+				def seleccionar2():
+					if opcion4.get() == 1:
+						self.agente.setSensores({"L":0,"R":1,"U":0,"D":0})
+						self.ponerInicio()
+					elif opcion4.get() == 2:
+						self.agente.setSensores({"L":0,"R":0,"U":1,"D":0})
+						self.ponerInicio()
+					elif opcion4.get() == 3:
+						self.agente.setSensores({"L":1,"R":0,"U":0,"D":0})
+						self.ponerInicio()
+					elif opcion4.get() == 4:
+						self.agente.setSensores({"L":0,"R":0,"U":0,"D":1})
+						self.ponerInicio()
+					ventanaDatos2.destroy() 
+				Radiobutton(ventanaDatos2,text="Derecha",variable=opcion4,value=1,command=seleccionar2).grid(row=0,column=0)
+				Radiobutton(ventanaDatos2,text="Arriba",variable=opcion4,value=2,command=seleccionar2).grid(row=1,column=0)
+				Radiobutton(ventanaDatos2,text="Izquierda",variable=opcion4,value=3,command=seleccionar2).grid(row=2,column=0)
+				Radiobutton(ventanaDatos2,text="Abajo",variable=opcion4,value=4,command=seleccionar2).grid(row=3,column=0)
+			elif opcion3.get() == 2:
+				self.agente.setSensores({"L":1,"R":1,"U":1,"D":1})
+				self.ponerInicio()
+
+			ventanaDatos.destroy() 
+
+		Radiobutton(ventanaDatos,text="Un sensor",variable=opcion3,value=1,command=seleccionar).grid(row=0,column=0)
+		Radiobutton(ventanaDatos,text="Cuatro sensores",variable=opcion3,value=2,command=seleccionar).grid(row=1,column=0)
+
+	def ponerInicio(self):
+		self.root.deiconify()
+		ventanaDatos = Toplevel()
+		ventanaDatos.title("Laberinto")
+		ventanaDatos.resizable(1,1)
+		ventanaDatos.geometry('380x300')
+		ventanaDatos.configure(background="dark turquoise")
+
+		d1 = StringVar()
+		Entry(ventanaDatos,justify="center",textvariable=d1).grid(row=0,column=0)
+
+		d2 = StringVar()
+		Entry(ventanaDatos,justify="center",textvariable=d2).grid(row=0,column=1)
+
+		d3 = StringVar()
+		Entry(ventanaDatos,justify="center",textvariable=d3).grid(row=1,column=0)
+
+		d4 = StringVar()
+		Entry(ventanaDatos,justify="center",textvariable=d4).grid(row=1,column=1)
+		Button(ventanaDatos,text="Establecer",command=lambda:establecerPuntos(int(d1.get()),int(d2.get()),int(d3.get()),int(d4.get()))).grid(row=0,column=2)
+
+		def establecerPuntos(d1,d2,d3,d4):
+				self.mapa.laberinto[d1][d2].establecerInicio(ventanaDatos)
+				self.mapa.laberinto[d3][d4].establecerFin(ventanaDatos)
+				puntoX = d1
+				puntoY = d2
+				self.agente.setPosicion(d1,d2)
+				self.agente.usarSensores(self.mapa)
+				if self.mapa.laberinto[d1][d2].checarFinal():
+					self.acabarApp()
 
 	def right(self,event):
 		self.agente.mover(self.mapa,"R")
-		self.mapa[agente.posicionX][agente.posicionY].checarFinal()
-		self.agente.usarSensores(self.mapa)
+		if self.mapa.laberinto[self.agente.posicionX][self.agente.posicionY].checarFinal():
+			self.acabarApp()
+		else:
+			self.agente.usarSensores(self.mapa)
 
 	def left(self,event):
 		self.agente.mover(self.mapa,"L")
-		self.mapa[agente.posicionX][agente.posicionY].checarFinal()
-		self.agente.usarSensores(self.mapa)
+		if self.mapa.laberinto[self.agente.posicionX][self.agente.posicionY].checarFinal():
+			self.acabarApp()
+		else:
+			self.agente.usarSensores(self.mapa)
 
 	def up(self,event):
 		self.agente.mover(self.mapa,"F")
-		self.mapa[agente.posicionX][agente.posicionY].checarFinal()
-		self.agente.usarSensores(self.mapa)
+		if self.mapa.laberinto[self.agente.posicionX][self.agente.posicionY].checarFinal():
+			self.acabarApp()
+		else:
+			self.agente.usarSensores(self.mapa)
 
 	def down(self,event):
 		self.agente.mover(self.mapa,"B")
-		self.mapa[agente.posicionX][agente.posicionY].checarFinal()
-		self.agente.usarSensores(self.mapa)
+		if self.mapa.laberinto[self.agente.posicionX][self.agente.posicionY].checarFinal():
+			self.acabarApp()
+		else:
+			self.agente.usarSensores(self.mapa)
+
+	def acabarApp(self):
+		messagebox.showinfo("LLegó a la meta","Costo: {}\nPasos: {}".format(self.agente.puntaje,self.agente.pasos))
+		r = messagebox.askquestion("Reiniciar","Estás seguro?")
+		if r:
+			self.reiniciar()
+
+	def reiniciar(self):
+		del(self.agente)
+		self.mapa.borrarMarcas()
+		self.escogerAgente()
+
 
 app = App()

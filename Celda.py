@@ -17,20 +17,34 @@ class Celda:
 		self.setColor()
 
 	def setMarcas(self, lista):
-		if lista["V"] != 0:
-			self.marcas["V"] = "V"
+		if "V" in lista:
+			if lista["V"] != 0:
+				self.marcas["V"] = "V"
 
 		if lista["O"] != 0:
 			self.marcas["O"] = "O"
 		else:
 			self.marcas["O"] = 0
 
-		if lista["X"] != 0:
-			self.marcas["X"] = "X"
-		else:
-			self.marcas["X"] = 0
+		if "X" in lista:
+			if lista["X"] != 0:
+				self.marcas["X"] = "X"
+			else:
+				self.marcas["X"] = 0
+
+		if self.marcas["I"] == "I":
+			lista["I"] = "I"
+		if self.marcas["F"] == "F":
+			lista["F"] = "F"
+		if self.marcas["V"] == "V":
+			lista["V"] = "V"
+
 		x = ""
 		self.label.configure(text=str([x+key for key,i in lista.items() if i!=0]))
+
+	def quitarMarcas(self):
+		self.marcas = {"V":0,"O":0,"I":0,"X":0,"F":0}
+		self.label.configure(text="")
 
 	def establecerInicio(self,ventanaDatos):
 		ventanaDatos.destroy()
@@ -73,7 +87,7 @@ class Celda:
 		self.label.configure(background="black")
 
 	def checarFinal(self):
-		if self.label.text["F"] != 0:
+		if self.marcas["F"] == "F":
 			return 1
 
 	def setLabel(self,color):
