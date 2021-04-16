@@ -6,13 +6,61 @@ class Agente:
 	posicionY = 0
 	puntaje = 0
 	pasos = 0
-	vista = "Arriba"
+	vista = "R"
 
-	def voltear(self):
-		if self.vueltas["R"] == 1:
-			mapa.laberinto[self.posicionX][self.posicionY].setMarcas({"V":0,"O":1,"X":0})
+	def voltearIzquierda(self,mapa):
 		if self.vueltas["L"] == 1:
-			mapa.laberinto[self.posicionX][self.posicionY].setMarcas({"V":0,"O":1,"X":0})
+			if self.vista == "R":
+				self.vista = "U"
+			elif self.vista == "U":
+				self.vista = "L"
+			elif self.vista == "L":
+				self.vista = "D"
+			elif self.vista == "D":
+				self.vista = "R"
+			self.quitarMarcas(mapa)
+			if self.sensores["R"] == 1:
+				self.setSensores({"L":0,"R":0,"U":1,"D":0})
+				self.setMovimientos({"F":1,"B":0,"L":0,"R":0})
+			elif self.sensores["U"] == 1:
+				self.setSensores({"L":1,"R":0,"U":0,"D":0})
+				self.setMovimientos({"F":0,"B":0,"L":1,"R":0})
+			elif self.sensores["L"] == 1:
+				self.setSensores({"L":0,"R":0,"U":0,"D":1})
+				self.setMovimientos({"F":0,"B":1,"L":0,"R":0})
+			elif self.sensores["D"] == 1:
+				self.setSensores({"L":0,"R":1,"U":0,"D":0})
+				self.setMovimientos({"F":0,"B":0,"L":0,"R":1})
+	
+			self.usarSensores(mapa)
+			self.pasos += 1
+
+	def voltearDerecha(self,mapa):
+		if self.vueltas["R"] == 1:
+			if self.vista == "R":
+				self.vista = "D"
+			elif self.vista == "D":
+				self.vista = "L"
+			elif self.vista == "L":
+				self.vista = "U"
+			elif self.vista == "U":
+				self.vista = "R"
+			self.quitarMarcas(mapa)
+			if self.sensores["R"] == 1:
+				self.setSensores({"L":0,"R":0,"U":0,"D":1})
+				self.setMovimientos({"F":0,"B":1,"L":0,"R":0})
+			elif self.sensores["D"] == 1:
+				self.setSensores({"L":1,"R":0,"U":0,"D":0})
+				self.setMovimientos({"F":0,"B":0,"L":1,"R":0})
+			elif self.sensores["L"] == 1:
+				self.setSensores({"L":0,"R":0,"U":1,"D":0})
+				self.setMovimientos({"F":1,"B":0,"L":0,"R":0})
+			elif self.sensores["U"] == 1:
+				self.setSensores({"L":0,"R":1,"U":0,"D":0})
+				self.setMovimientos({"F":0,"B":0,"L":0,"R":1})
+
+			self.usarSensores(mapa)
+			self.pasos += 1
 
 	def mover(self,mapa,direccion):
 		if direccion == "R":
@@ -59,8 +107,6 @@ class Agente:
 						self.puntaje += self.dificultad[mapa.laberinto[self.posicionX+1][self.posicionY].terreno]
 						self.pasos += 1
 						self.posicionX = self.posicionX+1
-		
-
 
 	def usarSensores(self,mapa):
 		if self.sensores["R"] == 1:

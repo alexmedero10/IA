@@ -48,6 +48,8 @@ class App:
 		self.root.bind("<Left>",self.left)
 		self.root.bind("<Up>",self.up)
 		self.root.bind("<Down>",self.down)
+		self.root.bind("<z>",self.tleft)
+		self.root.bind("<x>",self.tright)
 
 		self.root.mainloop()
 
@@ -129,6 +131,10 @@ class App:
 	def escogerAgente(self):
 		if self.mapa.laberinto == []:
 			self.pedirArchivo()
+		if type(self.agente).__name__ != "Agente":
+			agente = Agente()
+			self.mapa.borrarMarcas()
+			self.mapa.bloquearMapa()
 
 		self.root.deiconify()
 		ventanaDatos = Toplevel()
@@ -165,10 +171,8 @@ class App:
 		def seleccionar():
 			if opcion2.get() == 1:
 				self.agente.setVueltas({"L":1,"R":0})
-				self.agente.setMovimientos({"F":1,"B":0,"L":0,"R":0})
 			elif opcion2.get() == 2:
 				self.agente.setVueltas({"L":1,"R":1})
-				self.agente.setMovimientos({"F":1,"B":0,"L":0,"R":0})
 			elif opcion2.get() == 3:
 				self.agente.setVueltas({"L":0,"R":0})
 				self.agente.setMovimientos({"F":1,"B":1,"L":1,"R":1})
@@ -199,15 +203,19 @@ class App:
 				def seleccionar2():
 					if opcion4.get() == 1:
 						self.agente.setSensores({"L":0,"R":1,"U":0,"D":0})
+						self.agente.setMovimientos({"F":0,"B":0,"L":0,"R":1})
 						self.ponerInicio()
 					elif opcion4.get() == 2:
 						self.agente.setSensores({"L":0,"R":0,"U":1,"D":0})
+						self.agente.setMovimientos({"F":1,"B":0,"L":0,"R":0})
 						self.ponerInicio()
 					elif opcion4.get() == 3:
 						self.agente.setSensores({"L":1,"R":0,"U":0,"D":0})
+						self.agente.setMovimientos({"F":0,"B":0,"L":1,"R":0})
 						self.ponerInicio()
 					elif opcion4.get() == 4:
 						self.agente.setSensores({"L":0,"R":0,"U":0,"D":1})
+						self.agente.setMovimientos({"F":0,"B":1,"L":0,"R":0})
 						self.ponerInicio()
 					ventanaDatos2.destroy() 
 				Radiobutton(ventanaDatos2,text="Derecha",variable=opcion4,value=1,command=seleccionar2).grid(row=0,column=0)
@@ -282,16 +290,17 @@ class App:
 		else:
 			self.agente.usarSensores(self.mapa)
 
+	def tleft(self,event):
+		self.agente.voltearIzquierda(self.mapa)
+
+	def tright(self,event):
+		self.agente.voltearDerecha(self.mapa)
+
 	def acabarApp(self):
 		messagebox.showinfo("LLegó a la meta","Costo: {}\nPasos: {}".format(self.agente.puntaje,self.agente.pasos))
-		r = messagebox.askquestion("Reiniciar","Estás seguro?")
-		if r:
-			self.reiniciar()
-
-	def reiniciar(self):
-		del(self.agente)
-		self.mapa.borrarMarcas()
-		self.escogerAgente()
+		r = messagebox.askquestion("Reiniciar","Reiniciar?")
+		if r == "yes":
+			self.escogerAgente()
 
 
 app = App()
