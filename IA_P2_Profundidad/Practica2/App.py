@@ -376,8 +376,12 @@ class App:
 
     def profundidad(self):
         pila = []
+    	#Metemos la posicion la posicion inicial
         pila.append([self.agente.posicionX,self.agente.posicionY])
 
+        #Prioridad (Abajo,Arriba,Derecha,Izquierda)
+        #Como es una pila la prioridad va a quedar volteada
+        #Prioridad (Izquierda,Derecha,Arriba,Abajo)
         dirX = [1,-1,0,0]
         dirY = [0,0,1,-1]
 
@@ -385,22 +389,29 @@ class App:
             posx,posy = pila.pop()
             print([posx,posy])
             self.agente.setPosicion(posx,posy)
+            #Se marca la celda como visitada
             self.mapa.laberinto[posx][posy].setMarcas({"V":1})
+            #Comprueba que no sea el final
             if(self.mapa.laberinto[posx][posy].marcas["F"] == "F"):
                 self.acabarApp()
                 return
+
             for i in range(4):
                 x = posx+dirX[i]
                 y = posy+dirY[i]
+                #Checa si la celda a la que se quiere mover esta dentro de los limtes
                 if(x>=0 and x<len(self.mapa.laberinto) and y>=0 and y<len(self.mapa.laberinto[0])):
+                	#Checa si la celda no esta visitada y si no es pared
                     if(self.mapa.laberinto[x][y].marcas["V"] != "V" and self.mapa.laberinto[x][y].terreno != 0):
                         pila.append([x,y])
 
 
     def anchura(self):
         cola = []
+        #Metemos la posicion inicial
         cola.append([self.agente.posicionX,self.agente.posicionY])
 
+        #Prioridad (Abajo,Arriba,Derecha,izquierda)
         dirX = [1,-1,0,0]
         dirY = [0,0,1,-1]
 
@@ -415,7 +426,9 @@ class App:
             for i in range(4):
                 x = posx+dirX[i]
                 y = posy+dirY[i]
+                #Checa si la celda a la que se quiere mover esta dentro de los limtes
                 if(x>=0 and x<len(self.mapa.laberinto) and y>=0 and y<len(self.mapa.laberinto[0])):
+                	#Checa si la celda no esta visitada y si no es pared
                     if(self.mapa.laberinto[x][y].marcas["V"] != "V" and self.mapa.laberinto[x][y].terreno != 0):
                         cola.append([x,y])
 
