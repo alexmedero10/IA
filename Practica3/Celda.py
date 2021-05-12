@@ -8,13 +8,14 @@ class Celda:
 		self.marcas = marcas
 		self.puntoX = X
 		self.puntoY = Y
-		self.distancia = -1
-		self.costo = -1
-		self.sumaDC = -1
+		self.distancia = 0
+		self.costo = 0
+		self.sumaDC = 0
 
-	def calcular(self,agente,puntoFX,puntoFY):
+	def calcular(self,agente,puntoFX,puntoFY,costoAnterior):
 		self.distancia = abs(self.puntoX-puntoFX)+abs(self.puntoY-puntoFY)
-		self.costo = agente.dificultad[self.terreno]
+		if costoAnterior != 0:
+			self.costo = agente.dificultad[self.terreno]+costoAnterior
 		self.sumaDC = self.distancia + self.costo
 		#Se marca el nodo como abierto
 		self.setMarcas({"O":1})
