@@ -8,6 +8,11 @@ class Mapa:
 			for celda in self.laberinto[i]:
 				celda.setLabel("black")
 
+	def descubrirMapa(self):
+		for i in range(len(self.laberinto)):
+			for celda in self.laberinto[i]:
+				celda.setColor()
+
 	def borrarMarcas(self):
 		for i in range(len(self.laberinto)):
 			for celda in self.laberinto[i]:

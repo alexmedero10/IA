@@ -103,6 +103,9 @@ class Celda:
 		elif self.terreno == 9:
 			self.label.configure(background="brown", borderwidth=2, relief="solid")
 
+	def setColorOptimo(self):
+		self.label.configure(background="white", borderwidth=2, relief="solid")
+
 	def bloquearCelda(self,ventanaDatos):
 		ventanaDatos.destroy()
 		self.label.configure(background="black")

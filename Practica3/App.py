@@ -29,6 +29,8 @@ class App:
 		self.filemenu.add_separator()
 		self.filemenu.add_command(label="Bloquear mapa",command=self.mapa.bloquearMapa)
 		self.filemenu.add_separator()
+		self.filemenu.add_command(label="Descubir mapa",command=self.mapa.descubrirMapa)
+		self.filemenu.add_separator()
 		self.filemenu.add_command(label="Bloquear celda",command=lambda:self.pedirCelda(1))
 		self.filemenu.add_separator()
 		self.filemenu.add_command(label="Descubir celda",command=lambda:self.pedirCelda(2))
@@ -78,8 +80,6 @@ class App:
 				linea.setColor()
 				linea.label.grid(row=i,column=j,sticky=S+N+E+W)
 				self.mapa.laberinto[i][j] = linea
-		self.mapa.bloquearMapa()
-
 
 	def pedirArchivo(self):
 		file_path = filedialog.askopenfilename()
@@ -173,6 +173,7 @@ class App:
 					self.acabarApp()
 					return
 
+				self.mapa.bloquearMapa()
 				self.agente.setPosicion(d1,d2)
 				self.agente.usarSensores(self.mapa)
 				self.algoritmo()
@@ -196,7 +197,7 @@ class App:
 		while not abiertos.empty():
 			#Se obtiene el nodo con valor h más pequeño y se saca de abiertos
 			h,celdaActual = abiertos.get()
-			print(celdaActual)
+			#print(celdaActual)
 			self.mapa.laberinto[celdaActual[0]][celdaActual[1]].setMarcas({"O":0,"C":1,"V":1})
 			celdaActual = self.mapa.laberinto[celdaActual[0]][celdaActual[1]]
 			#Se marca el nodo como cerrado y se mete a cerrados
@@ -240,8 +241,13 @@ class App:
 				#Se marca como visitado y se limpian los registros
 				self.mapa.laberinto[self.puntoFX][self.puntoFY].calcular(self.agente,self.puntoFX,self.puntoFY,costoCelda)
 				self.mapa.laberinto[self.puntoFX][self.puntoFY].setMarcas({"V":1,"O":1})
+				#Se saca el camino optimo desde el final
 				camino = [[self.puntoFX,self.puntoFY]]
-				self.marcarCaminoOptimo()
+				self.mapa.laberinto[camino[-1][0]][camino[-1][1]].setColorOptimo()
+				camino = self.marcarCaminoOptimo(camino)
+				print("CAMINO")
+				camino.reverse()
+				print(camino)
 				while not abiertos.empty():
 					try:
 						abiertos.get(False)
@@ -252,24 +258,30 @@ class App:
 				consulta.clear() 
 				self.acabarApp()
 
-		def marcarCaminoOptimo(self, camino):
+	def marcarCaminoOptimo(self, camino):
 
-			#Prioridad (Abajo,Arriba,Derecha,Izquierda)
-			#Como es una pila la prioridad va a quedar volteada
-			#Prioridad (Izquierda,Derecha,Arriba,Abajo)
-			dirX = [1,-1,0,0]
-			dirY = [0,0,1,-1]
+		#Prioridad (Abajo,Arriba,Derecha,Izquierda)
+		#Como es una pila la prioridad va a quedar volteada
+		#Prioridad (Izquierda,Derecha,Arriba,Abajo)
+		dirX = [1,-1,0,0]
+		dirY = [0,0,1,-1]
 
-			for i in range(4):
-				costoAnterior = self.mapa.laberinto[camino[-1][0]][camino[-1][1]].sumaDC
-				x = camino[-1][0]+dirX[i]
-				y = camino[-1][1]+dirY[i]
-				#Checa si la celda a la que se quiere mover esta dentro de los limtes
-				if(x>=0 and x<len(self.mapa.laberinto) and y>=0 and y<len(self.mapa.laberinto[0])):
-					#Checa si la celda no esta visitada y si no es pared
-					if(self.mapa.laberinto[x][y].marcas["V"] != "V" and self.mapa.laberinto[x][y].sumaDC >= costoAnterior):
-						camino.append([x,y])
-						self.marcarCaminoOptimo(camino)
+		for i in range(4):
+			costoAnterior = self.mapa.laberinto[camino[-1][0]][camino[-1][1]].sumaDC
+			x = camino[-1][0]+dirX[i]
+			y = camino[-1][1]+dirY[i]
+			#Checa si la celda a la que se quiere mover esta dentro de los limtes
+			if(x>=0 and x<len(self.mapa.laberinto) and y>=0 and y<len(self.mapa.laberinto[0])):
+				#Checa si esta en la lista de cerrados y si su costo es menor a la celda anterior
+				if(self.mapa.laberinto[x][y].marcas["C"] != 0 and self.mapa.laberinto[x][y].sumaDC < costoAnterior):
+					camino.append([x,y])
+					self.mapa.laberinto[x][y].setColorOptimo()
+					#Hasta que llegue al inicio se detiene
+					if(self.mapa.laberinto[x][y].marcas["I"] == 0):
+						#print(camino[-1])
+						return self.marcarCaminoOptimo(camino)
+					else:
+						return camino
 
 	def acabarApp(self):
 		messagebox.showinfo("LLegó a la meta","Fin")
