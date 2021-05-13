@@ -110,7 +110,6 @@ class App:
 			Entry(ventanaDatos,justify="center",textvariable=d3).grid(row=1,column=0)
 			Button(ventanaDatos,text="Crear",command=lambda:self.mapa.laberinto[int(d1.get())][int(d2.get())].cambiarValor(int(d3.get()),ventanaDatos)).grid(row=0,column=2)
 
-
 	def escogerAgente(self):
 		if self.mapa.laberinto == []:
 			self.pedirArchivo()
@@ -176,16 +175,20 @@ class App:
 				self.mapa.bloquearMapa()
 				self.agente.setPosicion(d1,d2)
 				self.agente.usarSensores(self.mapa)
-				self.algoritmo()
+				self.algoritmo(self.puntoFX,self.puntoFY)
 
 
-	def algoritmo(self):
+	def algoritmo(self,posX,posY):
 		abiertos = PriorityQueue()
 		cerrados = []
 		consulta = []
 		puntoX = self.agente.posicionX
 		puntoY = self.agente.posicionY
 		costoCelda = 0
+
+		dirX = [0,0,-1,1]
+		dirY = [1,-1,0,0]
+		
 		#Se calculan los valores para el nodo inicial
 		self.mapa.laberinto[puntoX][puntoY].calcular(self.agente,self.puntoFX,self.puntoFY,costoCelda)
 		#Se mete a los nodos abiertos
@@ -209,40 +212,25 @@ class App:
 			puntoY = self.agente.posicionY
 			costoCelda = self.mapa.laberinto[puntoX][puntoY].sumaDC
 
-			if puntoY+1 < len(self.mapa.laberinto[puntoY]):
-				#Verificar que el nodo no lo hayamos metido a abiertos o cerrados
-				if self.mapa.laberinto[puntoX][puntoY+1] not in consulta:
-					#Verificar que el agente se pueda mover a esa casilla
-					if self.agente.dificultad[self.mapa.laberinto[puntoX][puntoY+1].terreno] != 0:
-						self.mapa.laberinto[puntoX][puntoY+1].calcular(self.agente,self.puntoFX,self.puntoFY,costoCelda)
-						abiertos.put([self.mapa.laberinto[puntoX][puntoY+1].sumaDC,[self.mapa.laberinto[puntoX][puntoY+1].puntoX,self.mapa.laberinto[puntoX][puntoY+1].puntoY]])
-						consulta.append(self.mapa.laberinto[puntoX][puntoY+1])
-			if puntoY > 0:
-				if self.mapa.laberinto[puntoX][puntoY-1] not in consulta:
-					if self.agente.dificultad[self.mapa.laberinto[puntoX][puntoY-1].terreno] != 0:
-						self.mapa.laberinto[puntoX][puntoY-1].calcular(self.agente,self.puntoFX,self.puntoFY,costoCelda)
-						abiertos.put([self.mapa.laberinto[puntoX][puntoY-1].sumaDC,[self.mapa.laberinto[puntoX][puntoY-1].puntoX,self.mapa.laberinto[puntoX][puntoY-1].puntoY]])
-						consulta.append(self.mapa.laberinto[puntoX][puntoY-1])
-			if puntoX > 0:
-				if self.mapa.laberinto[puntoX-1][puntoY] not in consulta:
-					if self.agente.dificultad[self.mapa.laberinto[puntoX-1][puntoY].terreno] != 0:
-						self.mapa.laberinto[puntoX-1][puntoY].calcular(self.agente,self.puntoFX,self.puntoFY,costoCelda)
-						abiertos.put([self.mapa.laberinto[puntoX-1][puntoY].sumaDC,[self.mapa.laberinto[puntoX-1][puntoY].puntoX,self.mapa.laberinto[puntoX-1][puntoY].puntoY]])
-						consulta.append(self.mapa.laberinto[puntoX-1][puntoY])
-			if puntoX+1 < len(self.mapa.laberinto):
-				if self.mapa.laberinto[puntoX+1][puntoY] not in consulta:
-					if self.agente.dificultad[self.mapa.laberinto[puntoX+1][puntoY].terreno] != 0:
-						self.mapa.laberinto[puntoX+1][puntoY].calcular(self.agente,self.puntoFX,self.puntoFY,costoCelda)
-						abiertos.put([self.mapa.laberinto[puntoX+1][puntoY].sumaDC,[self.mapa.laberinto[puntoX+1][puntoY].puntoX,self.mapa.laberinto[puntoX+1][puntoY].puntoY]])
-						consulta.append(self.mapa.laberinto[puntoX+1][puntoY])
+			for i in range(4):
+				x = puntoX+dirX[i]
+				y = puntoY+dirY[i]
+				if(x >= 0 and x < len(self.mapa.laberinto) and y >= 0 and y < len(self.mapa.laberinto[0])):
+					#Verificar que el nodo no lo hayamos metido a abiertos o cerrados
+					if self.mapa.laberinto[x][y] not in consulta:
+						#Verificar que el agente se pueda mover a esa casilla
+						if self.agente.dificultad[self.mapa.laberinto[x][y].terreno] != 0:
+							self.mapa.laberinto[x][y].calcular(self.agente,self.puntoFX,self.puntoFY,costoCelda)
+							abiertos.put([self.mapa.laberinto[x][y].sumaDC,[self.mapa.laberinto[x][y].puntoX,self.mapa.laberinto[x][y].puntoY]])
+							consulta.append(self.mapa.laberinto[x][y])
 
 			#Si ya vimos al nodo destino, acabar el algortimo
-			if self.mapa.laberinto[self.puntoFX][self.puntoFY] in consulta:
+			if self.mapa.laberinto[posX][posY] in consulta:
 				#Se marca como visitado y se limpian los registros
-				self.mapa.laberinto[self.puntoFX][self.puntoFY].calcular(self.agente,self.puntoFX,self.puntoFY,costoCelda)
-				self.mapa.laberinto[self.puntoFX][self.puntoFY].setMarcas({"V":1,"O":1})
+				self.mapa.laberinto[posX][posY].calcular(self.agente,posX,posY,costoCelda)
+				self.mapa.laberinto[posX][posY].setMarcas({"V":1,"O":1})
 				#Se saca el camino optimo desde el final
-				camino = [[self.puntoFX,self.puntoFY]]
+				camino = [[posX,posY]]
 				self.mapa.laberinto[camino[-1][0]][camino[-1][1]].setColorOptimo()
 				camino = self.marcarCaminoOptimo(camino)
 				print("CAMINO")
