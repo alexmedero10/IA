@@ -66,7 +66,7 @@ class Celda:
 		else: self.label.configure(text="")
 
 
-	def quitarMarcas(self):
+	def quitaMarcas(self):
 		lista = {}
 		self.marcas["V"] = 0
 		self.marcas["A"] = 0
@@ -103,23 +103,15 @@ class Celda:
 
 	def setColor(self):
 		if self.terreno == 0:
-			self.label.configure(background="gray", borderwidth=2, relief="solid")
+			self.label.configure(background="black", borderwidth=2, relief="solid")
 		elif self.terreno == 1:
-			self.label.configure(background="green", borderwidth=2, relief="solid")
+			self.label.configure(background="pink", borderwidth=2, relief="solid")
 		elif self.terreno == 2:
 			self.label.configure(background="blue", borderwidth=2, relief="solid")
 		elif self.terreno == 3:
-			self.label.configure(background="orange", borderwidth=2, relief="solid")
+			self.label.configure(background="yellow", borderwidth=2, relief="solid")
 		elif self.terreno == 4:
-			self.label.configure(background="darkgreen", borderwidth=2, relief="solid")
-		elif self.terreno == 5:
-			self.label.configure(background="purple", borderwidth=2, relief="solid")
-		elif self.terreno == 6:
-			self.label.configure(background="white", borderwidth=2, relief="solid")
-		elif self.terreno == 8:
-			self.label.configure(background="cyan", borderwidth=2, relief="solid")
-		elif self.terreno == 9:
-			self.label.configure(background="brown", borderwidth=2, relief="solid")
+			self.label.configure(background="green", borderwidth=2, relief="solid")
 
 	def bloquearCelda(self,ventanaDatos):
 		ventanaDatos.destroy()

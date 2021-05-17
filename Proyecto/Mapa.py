@@ -16,7 +16,7 @@ class Mapa:
 	def borrarMarcas(self):
 		for i in range(len(self.laberinto)):
 			for celda in self.laberinto[i]:
-				celda.quitarMarcas()
+				celda.quitaMarcas()
 
 	def limpiarDatos(self):
 		for i in range(len(self.laberinto)):

@@ -14,14 +14,14 @@ class App:
 		self.humano = Humano()
 		self.mono = Mono()
 		self.pulpo = Pulpo()
-		self.puntoLlaveX = 0
-		self.puntoLlaveY = 0
-		self.puntoTemploX = 0
-		self.puntoTemploY = 0
-		self.puntoPiedrasX = 0
-		self.puntoPiedrasY = 0
-		self.puntoPortalX = 0
-		self.puntoPortalY = 0
+		self.puntoLlaveX = 10
+		self.puntoLlaveY = 10
+		self.puntoTemploX = 7
+		self.puntoTemploY = 10
+		self.puntoPiedrasX = 4
+		self.puntoPiedrasY = 7
+		self.puntoPortalX = 10
+		self.puntoPortalY = 6
 		self.root = Tk()
 		self.root.title("Laberinto")
 		self.root.geometry('500x500')
@@ -111,7 +111,10 @@ class App:
 			Button(ventanaDatos,text="Crear",command=lambda:self.mapa.laberinto[int(d1.get())][int(d2.get())].cambiarValor(int(d3.get()),ventanaDatos)).grid(row=0,column=2)
 
 	def pedirPuntos(self):
-		objetos = ['K','T','S','P','H','M','O']
+		#Para usar los establecidos por el programa y solo pedir agentes
+		objetos = ['H','M','O']
+		#Preguntar por todos los puntos
+		#objetos = ['K','T','S','P','H','M','O']
 		for i in range(len(objetos)):
 			self.ponerInicio(objetos[i])
 	
@@ -161,34 +164,49 @@ class App:
 					self.puntoPortalY = d2
 				elif letra == 'H':
 					self.humano.setPosicion(d1,d2)
+					#Checa que pueda iniciar en esa celda si no los pide otra vez
+					if self.humano.dificultad[self.mapa.laberinto[d1][d2].terreno] == 0:
+						messagebox.showinfo("Error","Agente no puede iniciar en esa posicion")
+						self.ponerInicio(letra)
 				elif letra == 'M':
 					self.mono.setPosicion(d1,d2)
+					if self.mono.dificultad[self.mapa.laberinto[d1][d2].terreno] == 0:
+						messagebox.showinfo("Error","Agente no puede iniciar en esa posicion")
+						self.ponerInicio(letra)
 				elif letra == 'O':
 					self.pulpo.setPosicion(d1,d2)
-					self.iniciarAlgoritmo()
-				"""
-					if self.agente.dificultad[self.mapa.laberinto[d1][d2].terreno] == 0:
+					if self.pulpo.dificultad[self.mapa.laberinto[d1][d2].terreno] == 0:
 						messagebox.showinfo("Error","Agente no puede iniciar en esa posicion")
-						self.acabarApp()
-						return
-				"""
+						self.ponerInicio(letra)
+					else:
+						self.iniciarAlgoritmo()
 		
 	def iniciarAlgoritmo(self):
 		agentes = [self.humano,self.mono,self.pulpo]
 		objetivos = [[self.puntoLlaveX,self.puntoLlaveY],[self.puntoTemploX,self.puntoTemploY],[self.puntoPiedrasX,self.puntoPiedrasY]]
-		nombres = ["Llave","Templo","Piedras"]
+
 		for i in range(len(agentes)):
 			posInicial = agentes[i].posicionX
 			posFinal = agentes[i].posicionY
 			costoCelda = 0
 			for j in range(len(objetivos)):
-				agentes[i].setPosicion(posInicial,posFinal)
-				print("Costo {} a {}: ".format(type(agentes[i]).__name__,nombres[j]),end="")
-				costoAnterior = self.algoritmo(agentes[i],objetivos[j][0],objetivos[j][1],costoCelda)
-				agentes[i].setPosicion(objetivos[j][0],objetivos[j][1])
-				print("Costo {} a {} y portal: ".format(type(agentes[i]).__name__,nombres[j]),end="")
-				self.algoritmo(agentes[i],self.puntoPortalX,self.puntoPortalY,costoAnterior)
-			print("")
+				costoAnterior = -1
+				costoAlPortal = -1
+				#Checamos que el agente pueda llegar a la celda objetivo
+				if agentes[i].dificultad[self.mapa.laberinto[objetivos[j][0]][objetivos[j][1]].terreno] != 0:
+					agentes[i].setPosicion(posInicial,posFinal)
+					costoAnterior = self.algoritmo(agentes[i],objetivos[j][0],objetivos[j][1],costoCelda)
+				#Si no puede llegar al objetivo no podria llegar al portal desde ese objetivo
+				if costoAnterior != -1:
+					#Checamos que el agente pueda llegar a la celda del portal
+					if agentes[i].dificultad[self.mapa.laberinto[self.puntoPortalX][self.puntoPortalY].terreno] != 0:
+						agentes[i].setPosicion(objetivos[j][0],objetivos[j][1])
+						costoAlPortal = self.algoritmo(agentes[i],self.puntoPortalX,self.puntoPortalY,costoAnterior)
+				#Se le inserta el costo al objetivo y al portal
+				agentes[i].setCostos([costoAnterior,costoAlPortal])
+						
+			self.imprimirCostos(agentes[i])
+		self.asignarMision()
 
 	def algoritmo(self,agente,posX,posY,costoCelda):
 		abiertos = PriorityQueue()
@@ -240,7 +258,7 @@ class App:
 				self.mapa.laberinto[posX][posY].calcular(agente,posX,posY,costoCelda)
 				self.mapa.laberinto[posX][posY].setMarcas({"V":1,"A":1})
 				celdaObjetivo = self.mapa.laberinto[posX][posY].sumaDC
-				print(celdaObjetivo)
+				#print(celdaObjetivo)
 				"""
 				#Se saca el camino optimo desde el final
 				camino = [[posX,posY]]
@@ -287,11 +305,70 @@ class App:
 					else:
 						return camino
 
+	def asignarMision(self):
+		#Donde se van a agregar la tarea de cada agente
+		#0 es de la llave, 1 del templo y 2 de las piedras
+		totalMisiones = []
+		#Tiene el costo, y las tareas de cada agente para obtener el costo
+		misiones = {}
+		total = 0
+		#Probamos todas las combinaciones para sacar el costo total minimo
+		for i in range(len(self.humano.costos)):
+			if self.humano.costos[i][1] == -1:
+				continue
+			total = self.humano.costos[i][1]
+			totalMisiones.append(i)
+			for j in range(len(self.mono.costos)):
+				if self.mono.costos[j][1] == -1:
+					continue
+				total += self.mono.costos[j][1]
+				totalMisiones.append(j)
+				for k in range(len(self.pulpo.costos)):
+					if self.pulpo.costos[k][1] == -1:
+						continue
+					if i==j or i==k or j==k:
+						continue
+					#Costo total
+					total += self.pulpo.costos[k][1]
+					totalMisiones.append(k)
+					#Se guarda una copia, si no se pone [:] la lista se sigue modificando
+					misiones[total] = totalMisiones[:]
+					totalMisiones.pop()
+					total -= self.pulpo.costos[k][1]
+				totalMisiones.pop()
+				total -= self.mono.costos[j][1]
+			totalMisiones.pop()
+			total -= self.humano.costos[i][1]
+
+		#Se ordenan para sacar la menor
+		misionesOrdenadas = sorted(misiones)
+		if len(misionesOrdenadas) == 0:
+			print("No hay solucion")
+		else:
+			print("Costo total: ",misionesOrdenadas[0])
+			misionesFinales = misiones[misionesOrdenadas[0]]
+			agentes = [self.humano,self.mono,self.pulpo]
+			objetivos = ["Llave","Templo","Piedras"]
+			for i in range(len(misionesFinales)):
+				print(type(agentes[i]).__name__)
+				print(objetivos[misionesFinales[i]])
+				print("Costo a {}: {}".format(objetivos[misionesFinales[i]],agentes[i].costos[misionesFinales[i]][0]))
+				print("Costo a portal: {}".format(agentes[i].costos[misionesFinales[i]][1]))
+			print("")
+		self.acabarApp()
+
+	def imprimirCostos(selfa,agente):
+		nombres = ["Llave","Templo","Piedras"]
+		for i in range(3):
+			print("Costo {} a {}: {}".format(type(agente).__name__,nombres[i],agente.costos[i][0]))
+			print("Costo {} a {} y portal: {}".format(type(agente).__name__,nombres[i],agente.costos[i][1]))
+		print("")
+
 	def acabarApp(self):
-		messagebox.showinfo("LLegó a la meta","Fin")
+		messagebox.showinfo("Terminó el programa","Fin")
 		r = messagebox.askquestion("Reiniciar","Reiniciar?")
 		if r == "yes":
-			self.escogerAgente()
+			self.pedirPuntos()
 
 
 app = App()
