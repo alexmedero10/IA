@@ -14,8 +14,8 @@ class App:
 		self.humano = Humano()
 		self.mono = Mono()
 		self.pulpo = Pulpo()
-		self.puntoLlaveX = 10
-		self.puntoLlaveY = 10
+		self.puntoLlaveX = 11
+		self.puntoLlaveY = 0
 		self.puntoTemploX = 7
 		self.puntoTemploY = 10
 		self.puntoPiedrasX = 4
@@ -112,9 +112,9 @@ class App:
 
 	def pedirPuntos(self):
 		#Para usar los establecidos por el programa y solo pedir agentes
-		objetos = ['H','M','O']
+		#objetos = ['H','M','O']
 		#Preguntar por todos los puntos
-		#objetos = ['K','T','S','P','H','M','O']
+		objetos = ['K','T','S','P','H','M','O']
 		for i in range(len(objetos)):
 			self.ponerInicio(objetos[i])
 	
@@ -258,16 +258,7 @@ class App:
 				self.mapa.laberinto[posX][posY].calcular(agente,posX,posY,costoCelda)
 				self.mapa.laberinto[posX][posY].setMarcas({"V":1,"A":1})
 				celdaObjetivo = self.mapa.laberinto[posX][posY].sumaDC
-				#print(celdaObjetivo)
-				"""
-				#Se saca el camino optimo desde el final
-				camino = [[posX,posY]]
-				self.mapa.laberinto[camino[-1][0]][camino[-1][1]].setColorOptimo()
-				camino = self.marcarCaminoOptimo(camino)
-				print("CAMINO")
-				camino.reverse()
-				print(camino)
-				"""
+
 				while not abiertos.empty():
 					try:
 						abiertos.get(False)
@@ -279,31 +270,6 @@ class App:
 				self.mapa.borrarMarcas()
 				self.mapa.limpiarDatos()
 				return celdaObjetivo
-
-	def marcarCaminoOptimo(self, camino):
-
-		#Prioridad (Abajo,Arriba,Derecha,Izquierda)
-		#Como es una pila la prioridad va a quedar volteada
-		#Prioridad (Izquierda,Derecha,Arriba,Abajo)
-		dirX = [1,-1,0,0]
-		dirY = [0,0,1,-1]
-
-		for i in range(4):
-			costoAnterior = self.mapa.laberinto[camino[-1][0]][camino[-1][1]].sumaDC
-			x = camino[-1][0]+dirX[i]
-			y = camino[-1][1]+dirY[i]
-			#Checa si la celda a la que se quiere mover esta dentro de los limtes
-			if(x>=0 and x<len(self.mapa.laberinto) and y>=0 and y<len(self.mapa.laberinto[0])):
-				#Checa si esta en la lista de cerrados y si su costo es menor a la celda anterior
-				if(self.mapa.laberinto[x][y].marcas["C"] != 0 and self.mapa.laberinto[x][y].sumaDC < costoAnterior):
-					camino.append([x,y])
-					self.mapa.laberinto[x][y].setColorOptimo()
-					#Hasta que llegue al inicio se detiene
-					if(self.mapa.laberinto[x][y].marcas["I"] == 0):
-						#print(camino[-1])
-						return self.marcarCaminoOptimo(camino)
-					else:
-						return camino
 
 	def asignarMision(self):
 		#Donde se van a agregar la tarea de cada agente
