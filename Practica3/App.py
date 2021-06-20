@@ -110,6 +110,7 @@ class App:
 			Entry(ventanaDatos,justify="center",textvariable=d3).grid(row=1,column=0)
 			Button(ventanaDatos,text="Crear",command=lambda:self.mapa.laberinto[int(d1.get())][int(d2.get())].cambiarValor(int(d3.get()),ventanaDatos)).grid(row=0,column=2)
 
+
 	def escogerAgente(self):
 		if self.mapa.laberinto == []:
 			self.pedirArchivo()
@@ -190,7 +191,7 @@ class App:
 		dirY = [1,-1,0,0]
 		
 		#Se calculan los valores para el nodo inicial
-		self.mapa.laberinto[puntoX][puntoY].calcular(self.agente,self.puntoFX,self.puntoFY,costoCelda)
+		self.mapa.laberinto[puntoX][puntoY].calcular(self.agente,self.puntoFX,self.puntoFY,costoCelda,self.mapa)
 		#Se mete a los nodos abiertos
 		abiertos.put([self.mapa.laberinto[puntoX][puntoY].sumaDC,[self.mapa.laberinto[puntoX][puntoY].puntoX,self.mapa.laberinto[puntoX][puntoY].puntoY]])
 		#Se mete a los nodos que ya ha estado en abiertos o cerrados
@@ -201,16 +202,18 @@ class App:
 			#Se obtiene el nodo con valor h más pequeño y se saca de abiertos
 			h,celdaActual = abiertos.get()
 			#print(celdaActual)
-			self.mapa.laberinto[celdaActual[0]][celdaActual[1]].setMarcas({"O":0,"C":1,"V":1})
 			celdaActual = self.mapa.laberinto[celdaActual[0]][celdaActual[1]]
 			#Se marca el nodo como cerrado y se mete a cerrados
-			celdaActual.setMarcas({"O":0,"C":1,"V":1})
+			if celdaActual.marcas['I'] == 'I':
+				celdaActual.setMarcas({"O":0,"C":2,"V":1})
+			else:
+				celdaActual.setMarcas({"O":0,"C":1,"V":1})
 			cerrados.append(celdaActual)
 			#El agente se mueve a ese nodo
 			self.agente.mover(self.mapa,celdaActual.puntoX,celdaActual.puntoY)
 			puntoX = self.agente.posicionX
 			puntoY = self.agente.posicionY
-			costoCelda = self.mapa.laberinto[puntoX][puntoY].sumaDC
+			costoCelda = self.mapa.laberinto[puntoX][puntoY].costo
 
 			for i in range(4):
 				x = puntoX+dirX[i]
@@ -220,17 +223,18 @@ class App:
 					if self.mapa.laberinto[x][y] not in consulta:
 						#Verificar que el agente se pueda mover a esa casilla
 						if self.agente.dificultad[self.mapa.laberinto[x][y].terreno] != 0:
-							self.mapa.laberinto[x][y].calcular(self.agente,self.puntoFX,self.puntoFY,costoCelda)
+							self.mapa.laberinto[x][y].calcular(self.agente,self.puntoFX,self.puntoFY,costoCelda,self.mapa)
 							abiertos.put([self.mapa.laberinto[x][y].sumaDC,[self.mapa.laberinto[x][y].puntoX,self.mapa.laberinto[x][y].puntoY]])
 							consulta.append(self.mapa.laberinto[x][y])
 
 			#Si ya vimos al nodo destino, acabar el algortimo
 			if self.mapa.laberinto[posX][posY] in consulta:
 				#Se marca como visitado y se limpian los registros
-				self.mapa.laberinto[posX][posY].calcular(self.agente,posX,posY,costoCelda)
-				self.mapa.laberinto[posX][posY].setMarcas({"V":1,"O":1})
+				self.mapa.laberinto[posX][posY].calcular(self.agente,posX,posY,costoCelda,self.mapa)
+				self.mapa.laberinto[posX][posY].setMarcas({"V":1,"O":1,"C":0})
 				#Se saca el camino optimo desde el final
 				camino = [[posX,posY]]
+				print(camino)
 				self.mapa.laberinto[camino[-1][0]][camino[-1][1]].setColorOptimo()
 				camino = self.marcarCaminoOptimo(camino)
 				print("CAMINO")
@@ -261,7 +265,7 @@ class App:
 			#Checa si la celda a la que se quiere mover esta dentro de los limtes
 			if(x>=0 and x<len(self.mapa.laberinto) and y>=0 and y<len(self.mapa.laberinto[0])):
 				#Checa si esta en la lista de cerrados y si su costo es menor a la celda anterior
-				if(self.mapa.laberinto[x][y].marcas["C"] != 0 and self.mapa.laberinto[x][y].sumaDC < costoAnterior):
+				if(self.mapa.laberinto[x][y].marcas["C"] != 0 and self.mapa.laberinto[x][y].sumaDC <= costoAnterior):
 					camino.append([x,y])
 					self.mapa.laberinto[x][y].setColorOptimo()
 					#Hasta que llegue al inicio se detiene

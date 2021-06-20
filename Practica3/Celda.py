@@ -12,9 +12,9 @@ class Celda:
 		self.costo = 0
 		self.sumaDC = 0
 
-	def calcular(self,agente,puntoFX,puntoFY,costoAnterior):
+	def calcular(self,agente,puntoFX,puntoFY,costoAnterior,mapa):
 		self.distancia = abs(self.puntoX-puntoFX)+abs(self.puntoY-puntoFY)
-		if costoAnterior != 0:
+		if mapa.laberinto[self.puntoX][self.puntoY].marcas['I'] != 'I':
 			self.costo = agente.dificultad[self.terreno]+costoAnterior
 		self.sumaDC = self.distancia + self.costo
 		#Se marca el nodo como abierto
@@ -43,7 +43,10 @@ class Celda:
 
 		if "C" in lista:
 			if lista["C"] != 0:
-				self.marcas["C"] = "C({})".format(self.sumaDC)
+				if lista["C"] == 2:
+					self.marcas["C"] = "C({})".format(self.sumaDC)
+				else:
+					self.marcas["C"] = "C({})".format(self.sumaDC)
 				lista["C"] = self.marcas["C"]
 
 		if "X" in lista:
