@@ -97,6 +97,10 @@ class Celda:
 		self.marcas[letra] = letra
 		self.label.configure(text="['{}']".format(self.marcas[letra]))
 
+	def establecerPuntoNoPedidos(self,letra):
+		self.marcas[letra] = letra
+		self.label.configure(text="['{}']".format(self.marcas[letra]))
+
 	def descubrirCelda(self,ventanaDatos):
 		ventanaDatos.destroy()
 		self.setColor()
@@ -112,6 +116,9 @@ class Celda:
 			self.label.configure(background="yellow", borderwidth=2, relief="solid")
 		elif self.terreno == 4:
 			self.label.configure(background="green", borderwidth=2, relief="solid")
+
+	def caminoOptimo(self,color):
+		self.label.configure(background=color, borderwidth=2, relief="solid")
 
 	def bloquearCelda(self,ventanaDatos):
 		ventanaDatos.destroy()

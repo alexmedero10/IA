@@ -171,10 +171,15 @@ class App:
 	def pedirPuntos(self):
 		#Para usar los establecidos por el programa y solo pedir agentes
 		objetos = ['H','M','O']
+		noPedidos = ['K','T','S','P']
+		puntos = [[self.puntoLlaveX,self.puntoLlaveY],[self.puntoTemploX,self.puntoTemploY],[self.puntoPiedrasX,self.puntoPiedrasY],[self.puntoPortalX,self.puntoPortalY]]
 		#Preguntar por todos los puntos
 		#objetos = ['K','T','S','P','H','M','O']
 		for i in range(len(objetos)):
 			self.ponerInicio(objetos[i])
+
+		for i in range(len(noPedidos)):
+			self.mapa.laberinto[puntos[i][0]][puntos[i][1]].establecerPuntoNoPedidos(noPedidos[i])
 	
 	def ponerInicio(self,letra):
 		self.root.deiconify()
@@ -249,7 +254,10 @@ class App:
 			posFinal = agentes[i].posicionY
 			costoCelda = 0
 			distanciaCelda = 0
+			distanciaCelda2 = 0
 			h = 0
+			hObjetivo = 0
+			hPortal = 0
 
 			for j in range(len(objetivos)):
 				costoAnterior = -1
@@ -259,21 +267,22 @@ class App:
 				#Checamos que el agente pueda llegar a la celda objetivo
 				if agentes[i].dificultad[self.mapa.laberinto[objetivos[j][0]][objetivos[j][1]].terreno] != 0:
 					agentes[i].setPosicion(posInicial,posFinal)
-					distanciaCelda = abs((posInicial-objetivos[j][0])+(posFinal-objetivos[j][1]))
+					distanciaCelda = abs(abs(posInicial-objetivos[j][0])+abs(posFinal-objetivos[j][1]))
 					h = distanciaCelda
-					optimoObjetivo, costoAnterior = self.algoritmo(agentes[i],objetivos[j][0],objetivos[j][1],costoCelda,distanciaCelda,h)
+					optimoObjetivo, costoAnterior, hObjetivo = self.algoritmo(agentes[i],objetivos[j][0],objetivos[j][1],costoCelda,distanciaCelda,h)
 					#print(optimoObjetivo,costoAnterior)
 				#Si no puede llegar al objetivo no podria llegar al portal desde ese objetivo
 				if costoAnterior != -1:
 					#Checamos que el agente pueda llegar a la celda del portal
 					if agentes[i].dificultad[self.mapa.laberinto[self.puntoPortalX][self.puntoPortalY].terreno] != 0:
 						agentes[i].setPosicion(objetivos[j][0],objetivos[j][1])
-						distanciaCelda = abs((objetivos[j][0]-self.puntoPortalX)+(objetivos[j][1]-self.puntoPortalY))
-						h = distanciaCelda
-						optimoPortal, costoAlPortal = self.algoritmo(agentes[i],self.puntoPortalX,self.puntoPortalY,costoCelda,distanciaCelda,h)
+						distanciaCelda2 = abs(abs(objetivos[j][0]-self.puntoPortalX)+abs(objetivos[j][1]-self.puntoPortalY))
+						h = distanciaCelda2
+						optimoPortal, costoAlPortal,hPortal = self.algoritmo(agentes[i],self.puntoPortalX,self.puntoPortalY,costoCelda,distanciaCelda2,h)
 						#print(optimoPortal,costoAlPortal)
 				#Se le inserta el costo al objetivo y al portal
 				agentes[i].setCostos([costoAnterior,costoAlPortal])
+				agentes[i].setH([hObjetivo,hPortal])
 				agentes[i].setOptimo([optimoObjetivo,optimoPortal])
 				
 			self.imprimirCostos(agentes[i])
@@ -303,9 +312,9 @@ class App:
 					if [x,y] not in consulta:
 						#Verificar que el agente se pueda mover a esa casilla
 						if agente.dificultad[self.mapa.laberinto[x][y].terreno] != 0:
-							distancia = abs((x-posX)+(y-posY))
-							costo = agente.dificultad[self.mapa.laberinto[x][y].terreno]
-							nuevoNodo = TreeNode([x,y],costo+costoNodo,distancia,costo+costoNodo+distancia)
+							distancia = abs(abs(x-posX)+abs(y-posY))
+							costo = agente.dificultad[self.mapa.laberinto[x][y].terreno]+costoNodo
+							nuevoNodo = TreeNode([x,y],costo,distancia,costo+distancia)
 							arbol[x][y] = nuevoNodo
 							nodoActual.add_child(nuevoNodo)
 							abiertos.put([nuevoNodo.costo,nuevoNodo.data])
@@ -313,12 +322,13 @@ class App:
 							if nuevoNodo.data == [posX,posY]:
 								optimo = []
 								costo = nuevoNodo.costo
+								h = nuevoNodo.h
 								while nuevoNodo.parent != None:
-									optimo.append(nuevoNodo.data)
+									optimo.append([nuevoNodo.data,nuevoNodo.distancia])
 									nuevoNodo = nuevoNodo.parent
-								optimo.append(nuevoNodo.data)
-								return [optimo,costo]
-		return [],-1
+								optimo.append([nuevoNodo.data,nuevoNodo.distancia])
+								return optimo,costo,h
+		return [],-1,-1
 
 	def asignarMision(self):
 		#Donde se van a agregar la tarea de cada agente
@@ -364,15 +374,22 @@ class App:
 			misionesFinales = misiones[misionesOrdenadas[0]]
 			agentes = [self.humano,self.mono,self.pulpo]
 			objetivos = ["Llave","Templo","Piedras"]
+			colores = ["purple","red","brown"]
 			for i in range(len(misionesFinales)):
 				print(type(agentes[i]).__name__)
 				print(objetivos[misionesFinales[i]])
-				print("Costo a {}: {}".format(objetivos[misionesFinales[i]],agentes[i].costos[misionesFinales[i]][0]))
+				print("Costo a {}: {} {}".format(objetivos[misionesFinales[i]],agentes[i].costos[misionesFinales[i]][0],agentes[i].h[misionesFinales[i]][0]))
 				print("Recorrido a {}: {}".format(objetivos[misionesFinales[i]],agentes[i].optimo[misionesFinales[i]][0]))
-				print("Costo a portal: {}".format(agentes[i].costos[misionesFinales[i]][1]+agentes[i].costos[misionesFinales[i]][0]))
+				self.pintar(agentes[i].optimo[misionesFinales[i]][0],colores[i])
+				print("Costo a portal: {} {}".format(agentes[i].costos[misionesFinales[i]][1]+agentes[i].costos[misionesFinales[i]][0],agentes[i].h[misionesFinales[i]][1]+agentes[i].h[misionesFinales[i]][0]))
 				print("Recorrido a Portal desde {}: {}".format(objetivos[misionesFinales[i]],agentes[i].optimo[misionesFinales[i]][1]))
+				self.pintar(agentes[i].optimo[misionesFinales[i]][1],colores[i])
 			print("")
 		self.acabarApp()
+
+	def pintar(self,camino,color):
+		for celda in camino:
+			self.mapa.laberinto[celda[0][0]][celda[0][1]].caminoOptimo(color)
 
 	def imprimirCostos(selfa,agente):
 		nombres = ["Llave","Templo","Piedras"]
