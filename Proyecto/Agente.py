@@ -4,6 +4,7 @@ class Agente:
 		self.posicionX = 0
 		self.posicionY = 0
 		self.costos = []
+		self.optimo = []
 
 	def mover(self,mapa,puntoX,puntoY):
 		self.posicionX = puntoX
@@ -24,6 +25,9 @@ class Agente:
 
 	def setCostos(self,costos):
 		self.costos.append(costos)
+
+	def setOptimo(self,optimo):
+		self.optimo.append(optimo)
 
 
 class Humano(Agente):
